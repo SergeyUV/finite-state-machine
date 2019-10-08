@@ -6,7 +6,7 @@ class FSM {
     constructor(config) {
 
         if (! config){
-            throw new Error('Undefined FSM Config ');
+            throw new Error('Undefined FSM Config');
         }
 
         this.state = config.initial;
@@ -78,6 +78,8 @@ class FSM {
      */
     reset() {
         this.state = this.config.initial;
+        this.history.length = 0;
+        this.histPointer = 0;
     }
 
     /**
