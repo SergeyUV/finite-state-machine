@@ -1,34 +1,3 @@
-//------- tmp 
-// const config = {
-//     initial: 'normal',
-//     states: {
-//         normal: {
-//             transitions: {
-//                 study: 'busy',
-//             }
-//         },
-//         busy: {
-//             transitions: {
-//                 get_tired: 'sleeping',
-//                 get_hungry: 'hungry',
-//             }
-//         },
-//         hungry: {
-//             transitions: {
-//                 eat: 'normal'
-//             },
-//         },
-//         sleeping: {
-//             transitions: {
-//                 get_hungry: 'hungry',
-//                 get_up: 'normal',
-//             },
-//         },
-//     }
-// };
-//-----
-
-
 class FSM {
     /**
      * Creates new FSM instance.
@@ -43,6 +12,7 @@ class FSM {
         this.state = config.initial;
         this.config = config;
         this.history = [];
+        this.histPointer=0;
     }
 
     /**
@@ -69,7 +39,12 @@ class FSM {
         }
         
         if(! stateFound) throw new Error( `State '${state}' not found`);
-
+        
+        //update history
+        this.history.length = this.histPointer;
+        this.history.push(this.state);
+        this.histPointer++;
+        
         this.state = state;
     }
 
@@ -84,6 +59,12 @@ class FSM {
 
             if(ev == event){
                 evenForStateFound = true;
+
+                //update history
+                this.history.length = this.histPointer;
+                this.history.push(this.state);
+                this.histPointer++;
+
                 this.state = this.config.states[this.state].transitions[ev];
                 break;
             }
@@ -131,30 +112,43 @@ class FSM {
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-    undo() {}
+    undo() {
+
+        if( this.histPointer > 0 ){
+
+            if(this.histPointer == this.history.length){
+                this.history[this.histPointer] = this.state;
+            }            
+            this.state = this.history[--this.histPointer];
+            
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Goes redo to state.
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-    redo() {}
+    redo() {
+        
+        if( this.histPointer < this.history.length-1 && this.histPointer >= 0 ){
+            this.state = this.history[++this.histPointer];
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Clears transition history
      */
     clearHistory() {
         this.history.length = 0;
+        this.histPointer = 0;
     }
 }
-
- //const student = new FSM(config);
- //student.trigger('study');
- //student.trigger('hmmm... exception?');
- //console.log(ev + ' ' + this.config.states[this.state].transitions[ev] );
- //student.trigger();
- //student.changeState('busy');
- //student.trigger();
 
 module.exports = FSM;
 
